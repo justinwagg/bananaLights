@@ -78,14 +78,14 @@ def FADE(current, target):
     if target > current:
         #fade up
         for i in range(current, target +1):
-            print('fading up, i = {}').format(i)
+#            print('fading up, i = {}').format(i)
             pi.set_PWM_dutycycle(lightPin, i)
             time.sleep(.005)
 
     elif target < current:
         #fade down
         for i in range(current, target -1, -1):
-            print('fading down, i = {}').format(i)
+#            print('fading down, i = {}').format(i)
             pi.set_PWM_dutycycle(lightPin, i)
             time.sleep(.005)
 
@@ -115,20 +115,6 @@ print('current light is now: {}, changed at {}').format(currentLight, changeTime
 try:
     while True:
 
-#prior
-        # pir = pi.read(pirPin)
-        # if pir == 1:
-        #     pirHigh = pir
-        #     currentLight, changeTime = FADE(currentLight, result(getIndex(), pir))
-
-        # now = datetime.datetime.now()
-
-        # elapsed = now - changeTime
-
-        # if elapsed.total_seconds() >= 5: #or if the high value changes:
-        #     currentLight, changeTime = FADE(currentLight, result(getIndex(), pi.read(pirPin)))
-
-#post
         #read the PIR sensor, if it says high then... set a flag saying so, and record that time
         if pi.read(pirPin):
             pirHigh = 1
