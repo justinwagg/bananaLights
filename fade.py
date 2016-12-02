@@ -3,21 +3,20 @@ import time
 import pigpio
 from numpy import interp
 import sys
+import sqlite3
 
 #variables
 currentLight = 0
 target = 0;
-base = [
-    [0, 0],
-    [50, 100],
-    [0, 50],
-    [100,100]
-]
-hours = [6, 17, 24]
+
+
+# hours = [6, 17, 24]
 
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
+conn = sqlite3.connect('settings.db')
+c = conn.cursor()
 
 #pins
 lightPin = 23
@@ -33,6 +32,9 @@ pi.set_mode(switch, pigpio.INPUT)
 pi.set_mode(indicatorB, pigpio.OUTPUT)
 pi.set_mode(indicatorR, pigpio.OUTPUT)
 
+#modes
+pirHigh = 0
+pirHit = datetime.datetime.now()
 
 try:
     currentLight = pi.get_PWM_dutycycle(lightPin)
@@ -89,30 +91,74 @@ def FADE(current, target):
 
     return target, datetime.datetime.now()
 
+def result(index, id):
+    q = ('select rest, high from mode{} where rowid = (select max(rowid) from mode{});').format(index, index)
+    c.execute(q)
+    result = c.fetchall()[0]
+    # print("result = {}").format(result[id])
+    return result[id]
+
+
+def getHours():
+    q = ('select h1, h2, h3 from hours where rowid = (select max(rowid) from hours);')
+    c.execute(q)
+    result = c.fetchall()[0]
+    return result
+
+hours = getHours()
+
 #initial set upon start - always set to rest
 print('current light is: {}').format(currentLight)
-currentLight, changeTime = FADE(currentLight, base[getIndex()][0])
+currentLight, changeTime = FADE(currentLight, result(getIndex(), 0))
 print('current light is now: {}, changed at {}').format(currentLight, changeTime)
 
 try:
     while True:
-        pir = pi.read(pirPin)
-        if pir == 1:
-            currentLight, changeTime = FADE(currentLight, base[getIndex()][pir])
 
+#prior
+        # pir = pi.read(pirPin)
+        # if pir == 1:
+        #     pirHigh = pir
+        #     currentLight, changeTime = FADE(currentLight, result(getIndex(), pir))
 
+        # now = datetime.datetime.now()
+
+        # elapsed = now - changeTime
+
+        # if elapsed.total_seconds() >= 5: #or if the high value changes:
+        #     currentLight, changeTime = FADE(currentLight, result(getIndex(), pi.read(pirPin)))
+
+#post
+        #read the PIR sensor, if it says high then... set a flag saying so, and record that time
+        if pi.read(pirPin):
+            pirHigh = 1
+            pirHit = datetime.datetime.now()
+
+        #if the pir flag says `yes` then lets fade the light up to what's in the sqlite database by way of these nifty functions
+        if pirHigh == 1:
+            currentLight, changeTime = FADE(currentLight, result(getIndex(), pirHigh))
+
+        #to prepare to either fade down, or do nothing, we need to check the current time in relation to when we faded up
         now = datetime.datetime.now()
-        elapsed = now - changeTime
-        if elapsed.total_seconds() >= 5:
-            currentLight, changeTime = FADE(currentLight, base[getIndex()][pir])
+        elapsed = now - pirHit    
 
+        #if the elapsed time is greater than some number, then set the pir flag to low and fade to what we say in the tables
+        if elapsed.total_seconds() >= 5: 
+            pirHigh = 0
+            currentLight, changeTime = FADE(currentLight, result(getIndex(), pirHigh))
+
+        #if the switch goes high, set a global variable saying we're in a new world - the light should be high nomatter what
+        #this is a little fragile IMO - we're setting a global variable, which I hear is not a good idea.
+        #although the index is 3, the values in the table have a high and a low which will get read, and faded to in the above logic
+        #potential fix = only do above logic if the mode is not 3, but is that redundant? 
         if pi.wait_for_edge(switch, pigpio.RISING_EDGE, .01):
             pressed = datetime.datetime.now()
             lastPress = changeMode(pressed)
-            currentLight, changeTime = FADE(currentLight, base[getIndex()][highTrig])
+            currentLight, changeTime = FADE(currentLight, result(getIndex(), pirHigh))
 
 except KeyboardInterrupt:
     print("Keyboard Interrupt, stopping PWM, exiting")
     pi.set_PWM_dutycycle(lightPin, 0)
     pi.stop()
+    conn.close()
     sys.exit()

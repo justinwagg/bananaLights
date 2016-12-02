@@ -1,4 +1,4 @@
-#build initial settings 
+#build initial settings
 
 import sqlite3
 import os
@@ -25,14 +25,14 @@ c.execute(hrs)
 conn.commit()
 
 
-for i in range(1,5):
+for i in range(0,4):
     print(i)
     m = ('create table mode{} ( ROWID INTEGER PRIMARY KEY, rest int, high int);').format(i)
     c.execute(m)
     conn.commit()
 
 for i in range(0, 4):
-    m = ('insert into mode{} (rest, high) VALUES ({}, {});').format(i+1, base[i][0], base[i][1])
+    m = ('insert into mode{} (rest, high) VALUES ({}, {});').format(i, base[i][0], base[i][1])
     c.execute(m)
     conn.commit()
 
@@ -40,8 +40,23 @@ for i in range(0, 4):
 
 conn.close()
 
+#
+# currentLight, changeTime = FADE(currentLight, base[getIndex()][pir])
+#
 # conn.execute('''select name from sqlite_master where type='table';''')
 #
 # base[getIndex()][highTrig]
 #
-# ('select rest, high from mode{} where rowid = (select max(rowid) from mode{});').format(1,1)
+# q = ('select rest, high from mode{} where rowid = (select max(rowid) from mode{});').format(getIndex(), getIndex())
+#
+# q = ('select rest, high from mode{} where rowid = (select max(rowid) from mode{});').format(2, 2)
+# c.execute(q)
+# result = c.fetchall()[0]
+# result[1]
+#
+#
+# def result(index, id):
+#     q = ('select rest, high from mode{} where rowid = (select max(rowid) from mode{});').format(index, index)
+#     c.execute(q)
+#     result = c.fetchall()[0]
+#     return result[id]
