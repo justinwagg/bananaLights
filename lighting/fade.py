@@ -15,7 +15,7 @@ target = 0;
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
-conn = sqlite3.connect('settings.db')
+conn = sqlite3.connect('../database/settings.db')
 c = conn.cursor()
 
 #pins
