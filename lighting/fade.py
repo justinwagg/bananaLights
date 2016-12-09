@@ -19,7 +19,7 @@ target = 0;
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
-conn = mysql.connector.connect(user='', password='', host='')
+conn = mysql.connector.connect(user='kitchenPi', password='timecard1', host='192.168.1.4')
 c = conn.cursor()
 
 #pins
