@@ -3,7 +3,11 @@ import time
 import pigpio
 from numpy import interp
 import sys
-import sqlite3
+import mysql.connector
+
+#select id from device.map where location = 'kitchen' and name = 'under-cabinet';
+#this id device 1
+device_id = 1
 
 #variables
 currentLight = 0
@@ -15,7 +19,7 @@ target = 0;
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
-conn = sqlite3.connect('../database/settings.db')
+conn = mysql.connector.connect(user='', password='', host='')
 c = conn.cursor()
 
 #pins
@@ -92,7 +96,7 @@ def FADE(current, target):
     return target, datetime.datetime.now()
 
 def result(index, id):
-    q = ('select rest, high from mode{} where rowid = (select max(rowid) from mode{});').format(index, index)
+    q = ('select rest, high from device{}.mode{} where rowid = (select max(rowid) from device{}.mode{});').format(device_id, index, device_id, index)
     c.execute(q)
     result = c.fetchall()[0]
     # print("result = {}").format(result[id])
@@ -100,7 +104,7 @@ def result(index, id):
 
 
 def getHours():
-    q = ('select h1, h2, h3 from hours where rowid = (select max(rowid) from hours);')
+    q = ('select h1, h2, h3 from device{}.hours where rowid = (select max(rowid) from device{}.hours);').format(device_id, device_id)
     c.execute(q)
     result = c.fetchall()[0]
     return result
