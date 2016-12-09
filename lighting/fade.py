@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import datetime
 import time
 import pigpio
@@ -11,15 +13,19 @@ device_id = 1
 
 #variables
 currentLight = 0
-target = 0;
-
+target = 0
+pirHitCount = 0
 
 # hours = [6, 17, 24]
 
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
+<<<<<<< Updated upstream
 conn = mysql.connector.connect(user='kitchenPi', password='timecard1', host='192.168.1.4')
+=======
+conn = sqlite3.connect('/home/pi/Documents/bananaLights/database/settings.db')
+>>>>>>> Stashed changes
 c = conn.cursor()
 
 #pins
@@ -115,12 +121,18 @@ hours = getHours()
 print('current light is: {}').format(currentLight)
 currentLight, changeTime = FADE(currentLight, result(getIndex(), 0))
 print('current light is now: {}, changed at {}').format(currentLight, changeTime)
+print('mode is currently: {}').format(getIndex())
 
 try:
     while True:
+        
+       #print('current light is now: {}, changed at {}').format(currentLight, changeTime)
+       #print('mode is currently: {}').format(getIndex())
 
         #read the PIR sensor, if it says high then... set a flag saying so, and record that time
         if pi.read(pirPin):
+            #pirHitCount = pirHitCount + 1
+            #print("pir count is now {}").format(pirHitCount)
             pirHigh = 1
             pirHit = datetime.datetime.now()
 
@@ -131,9 +143,10 @@ try:
         #to prepare to either fade down, or do nothing, we need to check the current time in relation to when we faded up
         now = datetime.datetime.now()
         elapsed = now - pirHit    
+        #print elapsed
 
         #if the elapsed time is greater than some number, then set the pir flag to low and fade to what we say in the tables
-        if elapsed.total_seconds() >= 5: 
+        if elapsed.total_seconds() >= 120: 
             pirHigh = 0
             currentLight, changeTime = FADE(currentLight, result(getIndex(), pirHigh))
 
