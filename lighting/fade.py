@@ -21,11 +21,7 @@ pirHitCount = 0
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
-<<<<<<< Updated upstream
 conn = mysql.connector.connect(user='kitchenPi', password='timecard1', host='192.168.1.4')
-=======
-conn = sqlite3.connect('/home/pi/Documents/bananaLights/database/settings.db')
->>>>>>> Stashed changes
 c = conn.cursor()
 
 #pins
@@ -105,7 +101,7 @@ def result(index, id):
     q = ('select rest, high from device{}.mode{} where rowid = (select max(rowid) from device{}.mode{});').format(device_id, index, device_id, index)
     c.execute(q)
     result = c.fetchall()[0]
-    # print("result = {}").format(result[id])
+    print("result = {}").format(result[id])
     return result[id]
 
 
