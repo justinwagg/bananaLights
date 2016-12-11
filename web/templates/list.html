@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!doctype html>
+<html>
+   <body>
+   <h2>Daytime runs from {{hour[0][0]}} up to and including {{hour[0][1]-1}}. Evening starts at {{hour[0][1]}}, running through {{hour[0][2]-1}}. Overnight is between {{hour[0][2]}} and {{hour[0][0]-1}} </h2>
+	   <div class = "container">
+			<table class = "table table-striped" width = '50%'>
+			  <thead>
+			    <tr>
+			      <th>time</th>
+			      <th>rest</th>
+			      <th>high</th>
+			    </tr>
+			  </thead>
+			    <tbody>     
+			        {% for row in rows %}
+			            <tr>
+							<td>{{row[0]}}</td>
+			            	<td>{{row[1]}}</td>
+			            	<td>{{row[2]}}</td>
+			            </tr>
+			        {% endfor %}
+			    </tbody>
+			</table>
+		</div>
+     </body>
+</html>

@@ -1,11 +1,10 @@
 #!/usr/bin/python
-
 import datetime
 import time
 import pigpio
-from numpy import interp
 import sys
 import mysql.connector
+from password import *
 
 #select id from device.map where location = 'kitchen' and name = 'under-cabinet';
 #this id device 1
@@ -21,7 +20,7 @@ pirHitCount = 0
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
-conn = mysql.connector.connect(user='kitchenPi', password='timecard1', host='192.168.1.4')
+conn = mysql.connector.connect(user=user, password=password, host=host)
 c = conn.cursor()
 
 #pins
@@ -142,7 +141,7 @@ try:
         #print elapsed
 
         #if the elapsed time is greater than some number, then set the pir flag to low and fade to what we say in the tables
-        if elapsed.total_seconds() >= 120: 
+        if elapsed.total_seconds() >= 90 or pirHigh == 0: 
             pirHigh = 0
             currentLight, changeTime = FADE(currentLight, result(getIndex(), pirHigh))
 

@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+   <head>
+      <title>{{ title }}</title>
+   </head>
+
+   <body>
+      <h1>Hello, World!</h1>
+      <h2>Result is: {{ test[2][0][0] }}</h2>
+
+	 <table>
+	  {% for row in test %}
+	  <tr>
+	    <th> {{ row[0] }}</th>
+	    <th> {{ row[1] }}</th>
+	    <th> {{ row[2] }}</th>
+	  </tr> 
+	  {% endfor %}
+	</table>
+
+   </body>
+
