@@ -20,11 +20,8 @@ pirHitCount = 0
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
-<<<<<<< HEAD
 conn = mysql.connector.connect(user=user, password=password, host=host)
-=======
-conn = mysql.connector.connect(user='', password='', host='')
->>>>>>> 8c1453cf232ff5e1ffa0cee3e07fbdd44e3dea7d
+
 c = conn.cursor()
 
 #pins
