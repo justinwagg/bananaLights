@@ -1,1 +1,29 @@
-this is the log
+asdf
+Traceback (most recent call last):
+  File "/home/pi/Documents/bananaLights/lighting/fade.py", line 25, in <module>
+    conn = mysql.connector.connect(user=user, password=password, host=host)
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/__init__.py", line 155, in connect
+    return MySQLConnection(*args, **kwargs)
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/connection.py", line 123, in __init__
+    self.connect(**kwargs)
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/connection.py", line 430, in connect
+    self._open_connection()
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/connection.py", line 393, in _open_connection
+    self._socket.open_connection()
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/network.py", line 386, in open_connection
+    errno=2003, values=(self.get_address(), _strioerror(err)))
+mysql.connector.errors.InterfaceError: 2003: Can't connect to MySQL server on 'localhost:3306' (111 Connection refused)
+Traceback (most recent call last):
+  File "/home/pi/Documents/bananaLights/lighting/fade.py", line 25, in <module>
+    conn = mysql.connector.connect(user=user, password=password, host=host)
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/__init__.py", line 155, in connect
+    return MySQLConnection(*args, **kwargs)
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/connection.py", line 123, in __init__
+    self.connect(**kwargs)
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/connection.py", line 430, in connect
+    self._open_connection()
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/connection.py", line 393, in _open_connection
+    self._socket.open_connection()
+  File "/usr/lib/python2.7/dist-packages/mysql/connector/network.py", line 386, in open_connection
+    errno=2003, values=(self.get_address(), _strioerror(err)))
+mysql.connector.errors.InterfaceError: 2003: Can't connect to MySQL server on '0.0.0.0:3306' (111 Connection refused)

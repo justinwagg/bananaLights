@@ -5,10 +5,22 @@ import pigpio
 import sys
 import mysql.connector
 from password import *
+from subprocess import call
+import logging
 
-#select id from device.map where location = 'kitchen' and name = 'under-cabinet';
-#this id device 1
-device_id = 1
+info = logging.getLogger(__name__).info
+logging.basicConfig(level=logging.INFO,
+                        filename='fade.log', # log to this file
+                        format='%(asctime)s %(message)s')
+
+info('Started')
+
+call(['sudo','service','mysql','start'])
+info('Going to sleep for 10 seconds while mysql boots')
+time.sleep(10)
+
+#this id device 5
+device_id = 5
 
 #variables
 currentLight = 0
@@ -20,26 +32,26 @@ pirHitCount = 0
 highTrig = False # manual override to flip light to max high
 lastPress = datetime.datetime.now()
 
-<<<<<<< HEAD
+elapsePressed = datetime.datetime.now()-datetime.datetime.now()
+
 conn = mysql.connector.connect(user=user, password=password, host=host)
-=======
-conn = mysql.connector.connect(user='', password='', host='')
->>>>>>> 8c1453cf232ff5e1ffa0cee3e07fbdd44e3dea7d
 c = conn.cursor()
+
 
 #pins
 lightPin = 23
 pirPin = 18
+switchPWR = 16
 switch = 12
 indicatorB = 6
-indicatorR = 5
+
 
 #GPIO settings
 pi = pigpio.pi()
+pi.write(switchPWR, 1)
 pi.set_mode(lightPin, pigpio.OUTPUT)
 pi.set_mode(switch, pigpio.INPUT)
 pi.set_mode(indicatorB, pigpio.OUTPUT)
-pi.set_mode(indicatorR, pigpio.OUTPUT)
 
 #modes
 pirHigh = 0
@@ -75,10 +87,8 @@ def changeMode(pressTime):
         print((pressTime - lastPress).total_seconds()*1000)
         # pi.write(indicator, highTrig)
         if highTrig == True:
-            pi.set_PWM_dutycycle(indicatorR, 20)
-            pi.set_PWM_dutycycle(indicatorB, 90)
+            pi.set_PWM_dutycycle(indicatorB, 255)
         elif highTrig == False:
-            pi.set_PWM_dutycycle(indicatorR, 0)
             pi.set_PWM_dutycycle(indicatorB, 0)
 
     return datetime.datetime.now()
@@ -104,7 +114,6 @@ def result(index, id):
     q = ('select rest, high from device{}.mode{} where rowid = (select max(rowid) from device{}.mode{});').format(device_id, index, device_id, index)
     c.execute(q)
     result = c.fetchall()[0]
-    print("result = {}").format(result[id])
     return result[id]
 
 
@@ -125,13 +134,12 @@ print('mode is currently: {}').format(getIndex())
 try:
     while True:
         
+        now = datetime.datetime.now() 
        #print('current light is now: {}, changed at {}').format(currentLight, changeTime)
        #print('mode is currently: {}').format(getIndex())
 
         #read the PIR sensor, if it says high then... set a flag saying so, and record that time
         if pi.read(pirPin):
-            #pirHitCount = pirHitCount + 1
-            #print("pir count is now {}").format(pirHitCount)
             pirHigh = 1
             pirHit = datetime.datetime.now()
 
@@ -140,7 +148,6 @@ try:
             currentLight, changeTime = FADE(currentLight, result(getIndex(), pirHigh))
 
         #to prepare to either fade down, or do nothing, we need to check the current time in relation to when we faded up
-        now = datetime.datetime.now()
         elapsed = now - pirHit    
         #print elapsed
 
@@ -153,14 +160,26 @@ try:
         #this is a little fragile IMO - we're setting a global variable, which I hear is not a good idea.
         #although the index is 3, the values in the table have a high and a low which will get read, and faded to in the above logic
         #potential fix = only do above logic if the mode is not 3, but is that redundant? 
-        if pi.wait_for_edge(switch, pigpio.RISING_EDGE, .01):
+        # if pi.wait_for_edge(switch, pigpio.RISING_EDGE, .01):
+
+        #we had a habit of leaving the lights on high - so if the light is high for more than 10 minutes and 
+        #there's noone in the room, then turn the light off
+
+        if highTrig:
+            elapsePressed = now - pressed
+
+    # if(pi.read(switch) or ( elapsePressed.total_seconds() >= 5 and pirHigh == 0 )):
+	if pi.wait_for_edge(switch, pigpio.RISING_EDGE, .01):
+    # if( pi.wait_for_edge(switch, pigpio.RISING_EDGE, .01) or ( elapsePressed.total_seconds() >= 5 and pirHigh == 0 ) ):        
             pressed = datetime.datetime.now()
             lastPress = changeMode(pressed)
             currentLight, changeTime = FADE(currentLight, result(getIndex(), pirHigh))
+            elapsePressed = pressed - pressed
 
 except KeyboardInterrupt:
-    print("Keyboard Interrupt, stopping PWM, exiting")
+    info('Keyboard Interrupt, Stopping PWM, Cleaning Up, Exiting')
     pi.set_PWM_dutycycle(lightPin, 0)
+    pi.write(switchPWR, 0)
     pi.stop()
     conn.close()
     sys.exit()
